@@ -9,12 +9,12 @@ import MapView from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service'
 import AutoCompleteInput from './AutoCompleteInput';
 
-const PLACE_DETAIL_URL = 'https://maps.googleapis.com/maps/api/place/details/json';
+
 const DEFAULT_DELTA = { latitudeDelta: 0.015, longitudeDelta: 0.0121 };
 
 export default class LocationView extends React.Component {
   static propTypes = {
-    apiKey: PropTypes.string.isRequired,
+    mobileServer: PropTypes.string.isRequired,
     initialLocation: PropTypes.shape({
       latitude: PropTypes.number,
       longitude: PropTypes.number,
@@ -99,10 +99,16 @@ export default class LocationView extends React.Component {
 
   _onPlaceSelected = placeId => {
     this._input.blur();
-    axios.get(`${PLACE_DETAIL_URL}?key=${this.props.apiKey}&placeid=${placeId}`).then(({ data }) => {
+    axios.post(this.props.mobileServer + '/placeDetail', {
+      placeId: placeId,
+    })
+    .then(({ data }) => {
       let region = (({ lat, lng }) => ({ latitude: lat, longitude: lng }))(data.result.geometry.location);
       this._setRegion(region);
-    });
+    })
+    .catch( e => 
+      console.log(e)
+    );
   };
 
   _getCurrentLocation = () => {
@@ -135,7 +141,7 @@ export default class LocationView extends React.Component {
         <View style={styles.fullWidthContainer}>
           <AutoCompleteInput
             ref={input => (this._input = input)}
-            apiKey={this.props.apiKey}
+            mobileServer={this.props.mobileServer}
             style={[styles.input, { transform: [{ scale: inputScale }] }]}
             debounceDuration={this.props.debounceDuration}
             components={this.props.components}

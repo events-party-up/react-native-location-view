@@ -3,23 +3,20 @@ import PropTypes from 'prop-types';
 import { TextInput, View, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AutoCompleteListView from './AutoCompleteListView';
-import axios, { CancelToken } from 'axios';
+import axios from 'axios';
 import Events from 'react-native-simple-events';
 import debounce from '../utils/debounce';
 
-const AUTOCOMPLETE_URL = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
-const REVRSE_GEO_CODE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+const CancelToken = axios.CancelToken;
 
 export default class AutoCompleteInput extends React.Component {
   static propTypes = {
-    apiKey: PropTypes.string.isRequired,
-    language: PropTypes.string,
+    mobileServer: PropTypes.string.isRequired,
     debounceDuration: PropTypes.number.isRequired,
     components: PropTypes.arrayOf(PropTypes.string),
   };
 
   static defaultProps = {
-    language: 'en',
     components: [],
   };
 
@@ -49,7 +46,10 @@ export default class AutoCompleteInput extends React.Component {
     let { latitude, longitude } = location;
     this.source = CancelToken.source();
     axios
-      .get(`${REVRSE_GEO_CODE_URL}?key=${this.props.apiKey}&latlng=${latitude},${longitude}`, {
+      .post(this.props.mobileServer + '/geocode', {
+        latitude: latitude,
+        longitude: longitude,
+      }, {
         cancelToken: this.source.token,
       })
       .then(({ data }) => {
@@ -59,7 +59,10 @@ export default class AutoCompleteInput extends React.Component {
           let { formatted_address } = results[0];
           this.setState({ text: formatted_address });
         }
-      });
+      })
+      .catch ( e =>
+        console.log(e)
+      );
   };
 
   _request = text => {
@@ -67,19 +70,19 @@ export default class AutoCompleteInput extends React.Component {
     if (text.length >= 3) {
       this.source = CancelToken.source();
       axios
-        .get(AUTOCOMPLETE_URL, {
+        .post(this.props.mobileServer + '/autocomplete', {
+          input: text,
+          components: this.props.components.join('|'),
+        }, {
           cancelToken: this.source.token,
-          params: {
-            input: text,
-            key: this.props.apiKey,
-            language: this.props.language,
-            components: this.props.components.join('|'),
-          },
         })
         .then(({ data }) => {
-          let { predictions } = data;
+          let { predictions } = data ? data : [];
           this.setState({ predictions });
-        });
+        })
+        .catch ( e =>
+          console.log(e)
+        );
     } else {
       this.setState({ predictions: [] });
     }
