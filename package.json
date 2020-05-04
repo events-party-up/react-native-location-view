@@ -1,6 +1,6 @@
 {
   "name": "react-native-location-view",
-  "version": "0.1.5",
+  "version": "0.3.0",
   "description": "A package to help pick user location with autocomplete and current location support. Uses react-native-maps",
   "main": "index.js",
   "author": "Hunaid Hassan <hhunaid@gmail.com>",
@@ -9,6 +9,15 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/superapp/react-native-location-view"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write \"src/**/*.js\"",
+    "lint": "eslint --fix",
+    "prepublishOnly": "npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "keywords": [
     "autocomplete",
@@ -25,8 +34,8 @@
     "url": "https://github.com/superapp/react-native-location-view"
   },
   "dependencies": {
+    "axios": "^0.19.0",
     "prop-types": "^15.6.0",
-    "react-native-cancelable-fetch": "^0.1.1",
     "react-native-simple-events": "^1.0.1"
   },
   "files": [
@@ -37,6 +46,13 @@
   "peerDependencies": {
     "react-native": ">= 0.50",
     "react-native-maps": ">= 0.19.0",
-    "react-native-vector-icons": "^4.4.3"
+    "react-native-vector-icons": "^4.4.3",
+    "@react-native-community/geolocation": "^2.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "prettier": "^1.18.2"
   }
 }
